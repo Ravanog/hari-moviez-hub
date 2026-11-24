@@ -15,6 +15,7 @@ const SITE_NAME = 'Hari moviez hub';
 const PORT = Number(process.env.PORT || 3000);
 const OWNER_ID = Number(process.env.OWNER_ID || 0);
 const ALLOWED_CHANNEL_ID = process.env.CHANNEL_ID ? Number(process.env.CHANNEL_ID) : null;
+const LOG_CHANNEL_ID = process.env.LOG_CHANNEL_ID ? Number(process.env.LOG_CHANNEL_ID) : null;
 
 // --- PLANS CONFIG ---
 const PLANS = {
@@ -597,6 +598,28 @@ async function generateShortlink(targetUrl) {
   }
   return targetUrl;
 }
+
+async function sendToLogChannel(text) {
+  if (!bot || !LOG_CHANNEL_ID) return;
+  try {
+    await bot.sendMessage(LOG_CHANNEL_ID, text, { parse_mode: 'Markdown' });
+  } catch (err) {
+    console.error(`[${SITE_NAME}] Log channel error:`, err.message);
+  }
+}
+
+async function sendPhotoToLogChannel(photoId, caption) {
+  if (!bot || !LOG_CHANNEL_ID) return;
+  try {
+    await bot.sendPhoto(LOG_CHANNEL_ID, photoId, {
+      caption,
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    console.error(`[${SITE_NAME}] Log channel photo error:`, err.message);
+  }
+}
+
 
 // --- EXPRESS API ROUTES ---
 app.get('/api/config', (req, res) => {
