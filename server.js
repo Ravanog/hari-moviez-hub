@@ -108,6 +108,27 @@ if (bot) {
   });
 }
 
+async function sendToLogChannel(text) {
+  if (!bot || !LOG_CHANNEL_ID) return;
+  try {
+    await bot.sendMessage(LOG_CHANNEL_ID, text, { parse_mode: 'Markdown' });
+  } catch (err) {
+    console.error(`[${SITE_NAME}] Log channel error:`, err.message);
+  }
+}
+
+async function sendPhotoToLogChannel(photoId, caption) {
+  if (!bot || !LOG_CHANNEL_ID) return;
+  try {
+    await bot.sendPhoto(LOG_CHANNEL_ID, photoId, {
+      caption,
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    console.error(`[${SITE_NAME}] Log channel photo error:`, err.message);
+  }
+}
+
 async function isAuthorized(userId) {
   if (!userId) return false;
   if (OWNER_ID && Number(userId) === OWNER_ID) return true;
@@ -291,14 +312,7 @@ if (bot) {
     );
   });
 
-  // ADMIN EDIT COMMAND:
-  // /editmovie <title or id>
-  // title = New Title
-  // year = 2026
-  // posterUrl = https://...
-  // downloadLink = https://...
-  // credentials = Hari_moviez
-  // category = movie | series | vip
+  // ADMIN EDIT COMMAND: /editmovie <title or id> + field = value lines
   bot.onText(/^\/editmovie(?:\s+([\s\S]+))?$/i, async (msg, match) => {
     if (!(await isAuthorized(msg.from?.id))) {
       return bot.sendMessage(msg.chat.id, '❌ Admin only command.');
@@ -336,6 +350,27 @@ if (bot) {
       msg.chat.id,
       `✏️ Updated *${item.title}* (${item.year}) [${item.category.toUpperCase()}]` +
       (item.credentials ? `\n🏷️ *Credit:* ${item.credentials}` : ''),
+      { parse_mode: 'Markdown' }
+    );
+  });
+
+  // USER REQUEST COMMAND IN BOT: /request <movie name>
+  bot.onText(/^\/?request\s+(.+)/i, async (msg, match) => {
+    if (msg.chat.type === 'channel') return;
+    const movieName = match[1].trim();
+    const userId = msg.from?.id || 'Unknown';
+    const username = msg.from?.username ? `@${msg.from.username}` : (msg.from?.first_name || 'User');
+
+    await sendToLogChannel(
+      `📩 *${SITE_NAME} — New Movie Request*\n` +
+      `🎬 *Title:* ${movieName}\n` +
+      `👤 *User:* ${username} (\`${userId}\`)\n` +
+      `📍 *Source:* Telegram Bot`
+    );
+
+    return bot.sendMessage(
+      msg.chat.id,
+      `✅ Your request for *${movieName}* has been sent to *${SITE_NAME}*!`,
       { parse_mode: 'Markdown' }
     );
   });
@@ -430,6 +465,14 @@ if (bot) {
       userId,
       `⏳ Screenshot received for *${planObj.name} (₹${planObj.price})* on *${SITE_NAME}*! Please wait while an admin verifies your payment.`,
       { parse_mode: 'Markdown' }
+    );
+
+    await sendPhotoToLogChannel(
+      photoId,
+      `🧾 *${SITE_NAME} — Payment Screenshot Log*\n` +
+      `User: ${username}\n` +
+      `User ID: \`${userId}\`\n` +
+      `Selected Plan: *${planObj.name} (₹${planObj.price})*`
     );
 
     if (OWNER_ID) {
@@ -599,28 +642,6 @@ async function generateShortlink(targetUrl) {
   return targetUrl;
 }
 
-async function sendToLogChannel(text) {
-  if (!bot || !LOG_CHANNEL_ID) return;
-  try {
-    await bot.sendMessage(LOG_CHANNEL_ID, text, { parse_mode: 'Markdown' });
-  } catch (err) {
-    console.error(`[${SITE_NAME}] Log channel error:`, err.message);
-  }
-}
-
-async function sendPhotoToLogChannel(photoId, caption) {
-  if (!bot || !LOG_CHANNEL_ID) return;
-  try {
-    await bot.sendPhoto(LOG_CHANNEL_ID, photoId, {
-      caption,
-      parse_mode: 'Markdown'
-    });
-  } catch (err) {
-    console.error(`[${SITE_NAME}] Log channel photo error:`, err.message);
-  }
-}
-
-
 // --- EXPRESS API ROUTES ---
 app.get('/api/config', (req, res) => {
   res.json({
@@ -628,6 +649,28 @@ app.get('/api/config', (req, res) => {
     botUsername: process.env.BOT_USERNAME || 'YourBotUsername',
     plans: PLANS
   });
+});
+
+app.post('/api/request-content', async (req, res) => {
+  const { title, year, notes, contact } = req.body || {};
+  const cleanTitle = String(title || '').trim();
+  if (!cleanTitle) {
+    return res.status(400).json({ error: 'Movie or series title is required.' });
+  }
+
+  const cleanYear = String(year || '').trim();
+  const cleanNotes = String(notes || '').trim();
+  const cleanContact = String(contact || '').trim();
+
+  await sendToLogChannel(
+    `📩 *${SITE_NAME} — New Content Request*\n` +
+    `🎬 *Title:* ${cleanTitle}${cleanYear ? ` (${cleanYear})` : ''}\n` +
+    (cleanNotes ? `📝 *Details:* ${cleanNotes}\n` : '') +
+    (cleanContact ? `👤 *User / Telegram:* ${cleanContact}\n` : '') +
+    `📍 *Source:* Website`
+  );
+
+  return res.json({ ok: true, message: `Request submitted for "${cleanTitle}".` });
 });
 
 app.get('/api/media', async (req, res) => {
