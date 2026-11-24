@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hari moviez hub — Preparing Download</title>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0f172a; --surface: #1e293b; --surface-2: #0b1220;
+      --text: #f8fafc; --primary: #e11d48; --border: #334155;
+    }
+    :root[data-theme="light"] {
+      --bg: #f1f5f9; --surface: #ffffff; --surface-2: #e2e8f0;
+      --text: #0f172a; --primary: #e11d48; --border: #cbd5e1;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: system-ui, sans-serif;
+      display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 1rem;
+    }
+    .box {
+      background: var(--surface); padding: 2rem; border-radius: 12px;
+      text-align: center; max-width: 460px; width: 100%; border: 1px solid var(--border);
+    }
+    .ad-box {
+      background: var(--surface-2); border: 1px dashed var(--border);
+      padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.25rem;
+    }
+    .cred-box {
+      display: none; background: var(--surface-2); border: 1px solid var(--border);
+      padding: 0.75rem; border-radius: 8px; font-size: 0.88rem; margin-top: 1rem;
+    }
+    .timer { font-size: 2.75rem; font-weight: 800; color: var(--primary); margin: 1rem 0; }
+    .btn {
+      display: inline-block; background: var(--primary); color: #fff;
+      padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none;
+      font-weight: bold; margin-top: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="ad-box" id="downloadAdBox">📢 Hari moviez hub Sponsor Ad (Blocked on Standard & Diamond plans)</div>
+    <h2 id="movieTitle">Fetching Link...</h2>
+    <p id="statusText">Please wait while we prepare your download link.</p>
+    <div class="timer" id="countdown">5</div>
+    <div id="actionArea"></div>
+    <div class="cred-box" id="credentialsBox">
+      <strong>🏷️ Credit / Source:</strong> <span id="credentialsText"></span>
+    </div>
+  </div>
+
+  <script>
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const vipKey = localStorage.getItem('vipKey') || '';
+
+    async function initDownload() {
+      const res = await fetch(`/api/download/${id}`, { headers: { 'x-vip-key': vipKey } });
+      if (!res.ok) {
+        document.getElementById('movieTitle').innerText = "Access Denied";
+        document.getElementById('statusText').innerText = "Standard or Diamond plan required for VIP downloads.";
+        document.getElementById('countdown').style.display = 'none';
+        return;
+      }
+
+      const data = await res.json();
+      document.getElementById('downloadAdBox').style.display = data.showAds ? 'block' : 'none';
+      document.getElementById('movieTitle').innerText = `${data.title} (${data.year})`;
+
+      if (data.credentials) {
+        document.getElementById('credentialsText').innerText = data.credentials;
+        document.getElementById('credentialsBox').style.display = 'block';
+      }
+
+      let seconds = 5;
+      const timerEl = document.getElementById('countdown');
+      const interval = setInterval(() => {
+        seconds--;
+        timerEl.innerText = seconds;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          timerEl.style.display = 'none';
+          document.getElementById('statusText').innerText = "Your download link is ready!";
+          document.getElementById('actionArea').innerHTML =
+            `<a href="${data.downloadLink}" class="btn" rel="noopener noreferrer">🚀 Proceed to Download</a>`;
+        }
+      }, 1000);
+    }
+
+    initDownload();
+  </script>
+</body>
+</html>
