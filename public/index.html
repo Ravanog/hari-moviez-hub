@@ -30,44 +30,47 @@
 
     header {
       background: var(--surface);
-      padding: 1rem 2rem;
+      padding: 0.9rem 1.25rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.75rem;
     }
-    .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
-    .controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+    .logo { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
+    .controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    @media (min-width: 640px) {
+      .controls { width: auto; justify-content: flex-end; }
+    }
     button, input, a.btn {
-      padding: 0.55rem 1rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: var(--bg);
       color: var(--text);
       cursor: pointer;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     .btn-vip { background: var(--vip); color: #000; font-weight: 700; border: none; }
 
-    .ad-slot { max-width: 1300px; margin: 1rem auto 0; padding: 0 2rem; }
+    .ad-slot { max-width: 1300px; margin: 0.85rem auto 0; padding: 0 1rem; }
     .ad-box {
       background: var(--surface-2);
       border: 1px dashed var(--border);
       border-radius: 8px;
-      padding: 0.85rem 1rem;
+      padding: 0.75rem 1rem;
       text-align: center;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
 
     .tabs {
       display: flex;
       justify-content: center;
-      gap: 0.75rem;
-      padding: 1.5rem 1rem 0.75rem;
+      gap: 0.5rem;
+      padding: 1rem 1rem 0.5rem;
       flex-wrap: wrap;
     }
     .tab { background: var(--surface); font-weight: 600; }
@@ -76,63 +79,98 @@
     .credit-filters {
       display: flex;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 0.5rem 2rem 1.5rem;
+      gap: 0.45rem;
+      padding: 0.4rem 1rem 1.1rem;
       flex-wrap: wrap;
       max-width: 1300px;
       margin: auto;
     }
-    .credit-btn { font-size: 0.8rem; padding: 0.35rem 0.75rem; background: var(--surface); }
+    .credit-btn { font-size: 0.78rem; padding: 0.35rem 0.65rem; background: var(--surface); }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 1.5rem;
-      padding: 0 2rem 3rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+      padding: 0 1rem 2.5rem;
       max-width: 1300px;
       margin: auto;
     }
-    .card {
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+        gap: 1.35rem;
+        padding: 0 1.5rem 3rem;
+      }
+    }
+
+    .poster-card {
       background: var(--surface);
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
       position: relative;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease;
     }
-    .card img { width: 100%; height: 280px; object-fit: cover; }
-    .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .card-title { font-weight: 700; margin-bottom: 0.25rem; }
-    .card-year { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .card-credit { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+    .poster-card:active { transform: scale(0.98); }
+    @media (hover: hover) {
+      .poster-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    }
+    .poster-img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      display: block;
+    }
     .badge-vip {
-      position: absolute; top: 10px; right: 10px;
+      position: absolute; top: 8px; right: 8px;
       background: var(--vip); color: #000; font-weight: 800;
-      padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;
+      padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;
     }
-    .btn-download {
-      width: 100%; background: var(--primary); color: #fff;
-      border: none; font-weight: 600; text-align: center;
-      text-decoration: none; display: block; padding: 0.6rem; border-radius: 6px;
-    }
-    .btn-locked { background: #475569; }
 
     .modal {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-      justify-content: center; align-items: center; padding: 1rem; z-index: 50;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      justify-content: center; align-items: center; padding: 1rem; z-index: 60;
     }
     .modal.open { display: flex; }
     .modal-box {
-      background: var(--surface); padding: 1.75rem; border-radius: 12px;
+      background: var(--surface); padding: 1.4rem; border-radius: 12px;
       max-width: 780px; width: 100%; border: 1px solid var(--border);
-      max-height: 92vh; overflow-y: auto;
+      max-height: 90vh; overflow-y: auto;
     }
+    .detail-box {
+      max-width: 400px;
+      text-align: center;
+    }
+    .detail-poster {
+      width: 100%;
+      max-height: 360px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .detail-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .detail-meta { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 0.5rem; }
+    .detail-credit {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.88rem;
+      margin: 0.75rem 0 1.1rem;
+    }
+    .btn-download {
+      width: 100%; background: var(--primary); color: #fff;
+      border: none; font-weight: 700; text-align: center;
+      text-decoration: none; display: block; padding: 0.75rem 1rem; border-radius: 8px;
+    }
+    .btn-locked { background: #475569; }
+
     .plans-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 0.9rem;
+      margin: 1rem 0 1.25rem;
     }
     .plan-card {
       background: var(--bg);
@@ -144,8 +182,8 @@
       justify-content: space-between;
       gap: 0.75rem;
     }
-    .plan-price { font-size: 1.5rem; font-weight: 800; color: var(--vip); }
-    .plan-list { list-style: none; font-size: 0.85rem; color: var(--text-muted); display: grid; gap: 0.35rem; }
+    .plan-price { font-size: 1.45rem; font-weight: 800; color: var(--vip); }
+    .plan-list { list-style: none; font-size: 0.84rem; color: var(--text-muted); display: grid; gap: 0.35rem; }
     .btn-get { background: var(--primary); color: #fff; border: none; font-weight: 700; text-align: center; display: block; }
   </style>
 </head>
@@ -154,7 +192,7 @@
 <header>
   <div class="logo">🎬 Hari moviez hub</div>
   <div class="controls">
-    <input type="text" id="searchInput" placeholder="Search title or credit..." oninput="renderMedia()">
+    <input type="text" id="searchInput" placeholder="Search title or credit..." oninput="renderMedia()" style="flex:1; min-width:140px;">
     <button class="btn-vip" onclick="openVipModal()" id="vipBtn">👑 VIP Plans</button>
     <button onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
   </div>
@@ -177,8 +215,22 @@
 
 <div class="grid" id="mediaGrid"></div>
 
-<!-- VIP Plans & Key Modal -->
-<div class="modal" id="vipModal">
+<!-- Poster Detail Modal (Title, Year, Credits, Download Button) -->
+<div class="modal" id="detailModal" onclick="closeOnBackdrop(event, 'detailModal')">
+  <div class="modal-box detail-box">
+    <div style="display:flex; justify-content:flex-end; margin-bottom:0.4rem;">
+      <button onclick="closeDetailModal()">✕</button>
+    </div>
+    <img id="detailPoster" class="detail-poster" src="" alt="">
+    <div id="detailTitle" class="detail-title"></div>
+    <div id="detailYear" class="detail-meta"></div>
+    <div id="detailCredit" class="detail-credit"></div>
+    <div id="detailAction"></div>
+  </div>
+</div>
+
+<!-- VIP Plans Modal -->
+<div class="modal" id="vipModal" onclick="closeOnBackdrop(event, 'vipModal')">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2 style="color:var(--vip);">👑 Hari moviez hub — VIP Plans</h2>
@@ -237,6 +289,10 @@
 </div>
 
 <script>
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? ''
+    : '';
+
   const KNOWN_CREDITS = [
     'Hari_moviez',
     'MGBM',
@@ -288,7 +344,7 @@
   }
 
   async function loadConfig() {
-    const res = await fetch('/api/config');
+    const res = await fetch(`${API_BASE}/api/config`);
     const cfg = await res.json();
     const botUser = cfg.botUsername;
     document.getElementById('getBasicBtn').href = `https://t.me/${botUser}?start=plan_basic`;
@@ -304,7 +360,7 @@
 
   async function loadMedia() {
     const key = localStorage.getItem('vipKey') || '';
-    const res = await fetch('/api/media', { headers: { 'x-vip-key': key } });
+    const res = await fetch(`${API_BASE}/api/media`, { headers: { 'x-vip-key': key } });
     const data = await res.json();
     allMedia = data.media || [];
     entitlement = data.entitlement || entitlement;
@@ -332,37 +388,44 @@
     });
 
     filtered.forEach(item => {
-      const creditHtml = item.credentials
-        ? `<div class="card-credit">Credit: <b>${item.credentials}</b></div>`
-        : '';
-
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'poster-card';
+      card.onclick = () => openDetailModal(item);
       card.innerHTML = `
         ${item.category === 'vip' ? '<span class="badge-vip">VIP</span>' : ''}
-        <img src="${item.posterUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
-        <div class="card-body">
-          <div>
-            <div class="card-title">${item.title}</div>
-            <div class="card-year">${item.year} • ${item.category.toUpperCase()}</div>
-            ${creditHtml}
-          </div>
-          ${item.locked
-            ? `<button class="btn-download btn-locked" onclick="openVipModal()">🔒 Unlock VIP</button>`
-            : `<a class="btn-download" href="/download.html?id=${item._id}">⬇ Download</a>`
-          }
-        </div>
+        <img class="poster-img" src="${item.posterUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Poster'">
       `;
       grid.appendChild(card);
     });
   }
 
+  function openDetailModal(item) {
+    document.getElementById('detailPoster').src = item.posterUrl;
+    document.getElementById('detailPoster').alt = item.title;
+    document.getElementById('detailTitle').innerText = item.title;
+    document.getElementById('detailYear').innerText = `Year: ${item.year}`;
+    document.getElementById('detailCredit').innerHTML = `<b>Credits:</b> ${item.credentials || 'Not specified'}`;
+
+    const actionEl = document.getElementById('detailAction');
+    if (item.locked) {
+      actionEl.innerHTML = `<button class="btn-download btn-locked" onclick="closeDetailModal(); openVipModal();">🔒 Unlock VIP to Download</button>`;
+    } else {
+      actionEl.innerHTML = `<a class="btn-download" href="/download.html?id=${item._id}">⬇ Download</a>`;
+    }
+
+    document.getElementById('detailModal').classList.add('open');
+  }
+
+  function closeDetailModal() { document.getElementById('detailModal').classList.remove('open'); }
   function openVipModal() { document.getElementById('vipModal').classList.add('open'); }
   function closeVipModal() { document.getElementById('vipModal').classList.remove('open'); }
+  function closeOnBackdrop(e, id) {
+    if (e.target.id === id) document.getElementById(id).classList.remove('open');
+  }
 
   async function verifyVipKey() {
     const key = document.getElementById('vipKeyInput').value.trim();
-    const res = await fetch('/api/verify-vip', {
+    const res = await fetch(`${API_BASE}/api/verify-vip`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key })
