@@ -1,0 +1,16 @@
+{
+  "name": "hari-moviez-hub",
+  "version": "1.0.0",
+  "description": "Hari moviez hub - Movie, Series & VIP Portal with Telegram Bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mongoose": "^8.7.0",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
