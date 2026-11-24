@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hari hub</title>
+  <title>Hari moviez hub</title>
   <style>
     :root[data-theme="dark"] {
       --bg-base: #070604;
@@ -65,7 +65,7 @@
       user-select: none;
     }
 
-    header, .ad-slot, .section-wrap, .menu-drawer, .modal, .bottom-nav {
+    header, .ad-slot, .section-wrap, .menu-drawer, .modal, .bottom-nav, .search-bar-wrap {
       position: relative;
       z-index: 1;
     }
@@ -138,7 +138,6 @@
       box-shadow: 0 4px 16px rgba(245, 158, 11, 0.32);
     }
 
-    /* Search Strip (toggled from bottom Search tab) */
     .search-bar-wrap {
       display: none;
       max-width: 1300px;
@@ -152,7 +151,6 @@
       font-size: 0.92rem;
     }
 
-    /* Glazzy Ad Banner */
     .ad-slot { max-width: 1300px; margin: 0.75rem auto; padding: 0 1rem; }
     .ad-box {
       background: var(--surface);
@@ -167,7 +165,6 @@
       color: var(--text-muted);
     }
 
-    /* Sections & Grids */
     .section-wrap {
       max-width: 1300px;
       margin: 0 auto;
@@ -237,8 +234,21 @@
       border-radius: 5px;
       font-size: 0.72rem;
     }
+    .badge-views {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(10, 8, 4, 0.78);
+      backdrop-filter: blur(6px);
+      color: var(--gold-bright);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+    }
 
-    /* Bottom Navigation Bar (Home • Search • Menu) */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -281,7 +291,6 @@
       border-color: var(--border);
     }
 
-    /* Slide-out Menu Drawer */
     .menu-backdrop {
       display: none;
       position: fixed;
@@ -345,7 +354,6 @@
     .credit-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
     .credit-btn { font-size: 0.78rem; padding: 0.35rem 0.65rem; background: var(--surface-2); }
 
-    /* Modals */
     .modal {
       display: none;
       position: fixed;
@@ -449,7 +457,6 @@
   </div>
 </header>
 
-<!-- Search Bar (opens when Search tab in bottom bar is tapped) -->
 <div class="search-bar-wrap" id="searchBarWrap">
   <input type="text" class="search-input-full" id="searchInput" placeholder="Search title or credit..." oninput="renderMedia()">
 </div>
@@ -460,19 +467,16 @@
   </div>
 </div>
 
-<!-- Recently Added Strip -->
 <section class="section-wrap" id="recentSection">
   <div class="section-heading">Recently Added</div>
   <div class="recently-row" id="recentGrid"></div>
 </section>
 
-<!-- Main Poster Grid -->
 <section class="section-wrap">
   <div class="section-heading" id="mainGridHeading">All Titles</div>
   <div class="grid" id="mediaGrid"></div>
 </section>
 
-<!-- Bottom Navigation Bar: Home • Search • Menu -->
 <nav class="bottom-nav" aria-label="Primary bottom bar">
   <div class="bottom-nav-inner">
     <button class="nav-item active" id="navHomeBtn" onclick="goHome()">
@@ -490,7 +494,6 @@
   </div>
 </nav>
 
-<!-- Slide-out Navigation Menu -->
 <div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
 <aside class="menu-drawer" id="menuDrawer">
   <div class="menu-header">
@@ -514,7 +517,6 @@
   </div>
 </aside>
 
-<!-- Poster Detail Modal -->
 <div class="modal" id="detailModal" onclick="closeOnBackdrop(event, 'detailModal')">
   <div class="modal-box detail-box">
     <div style="display:flex; justify-content:flex-end; margin-bottom:0.4rem;">
@@ -528,7 +530,6 @@
   </div>
 </div>
 
-<!-- VIP Plans Modal -->
 <div class="modal" id="vipModal" onclick="closeOnBackdrop(event, 'vipModal')">
   <div class="modal-box">
     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -588,6 +589,7 @@
 </div>
 
 <script>
+  // Set to your Koyeb URL when hosting frontend separately on Vercel, e.g. 'https://your-app.koyeb.app'
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? ''
     : '';
@@ -712,13 +714,24 @@
     closeMenu();
   }
 
+  function getFakeViews(id) {
+    const str = String(id || '1');
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash * 31 + str.charCodeAt(i)) % 100000;
+    }
+    const views = 2400 + (hash % 245000);
+    return views >= 1000 ? `${(views / 1000).toFixed(1)}K views` : `${views} views`;
+  }
+
   function createPosterCard(item) {
     const card = document.createElement('div');
     card.className = 'poster-card';
     card.onclick = () => openDetailModal(item);
     card.innerHTML = `
       ${item.category === 'vip' ? '<span class="badge-vip">VIP</span>' : ''}
-      <img class="poster-img" src="${item.posterUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x600?text=No+Poster'">
+      <img class="poster-img" src="${item.posterUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'">
+      <span class="badge-views">👁 ${getFakeViews(item._id)}</span>
     `;
     return card;
   }
@@ -736,7 +749,7 @@
     const showRecent = currentTab === 'all' && !query;
     recentSection.style.display = showRecent ? 'block' : 'none';
     if (showRecent) {
-      allMedia.slice(0, 6).forEach(item => recentGrid.appendChild(createPosterCard(item)));
+      allMedia.slice(0, 5).forEach(item => recentGrid.appendChild(createPosterCard(item)));
     }
 
     const labelMap = {
