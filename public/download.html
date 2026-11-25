@@ -6,40 +6,128 @@
   <title>Hari moviez hub — Preparing Download</title>
   <style>
     :root[data-theme="dark"] {
-      --bg: #0f172a; --surface: #1e293b; --surface-2: #0b1220;
-      --text: #f8fafc; --primary: #e11d48; --border: #334155;
+      --bg-base: #070b14;
+      --glaze-top: rgba(245, 158, 11, 0.14);
+      --glaze-mid: rgba(30, 58, 138, 0.16);
+      --surface: rgba(15, 22, 39, 0.94);
+      --surface-2: rgba(22, 32, 56, 0.9);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --gold: #f59e0b;
+      --gold-bright: #fbbf24;
+      --gold-deep: #d97706;
+      --border: rgba(148, 163, 184, 0.18);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     :root[data-theme="light"] {
-      --bg: #f1f5f9; --surface: #ffffff; --surface-2: #e2e8f0;
-      --text: #0f172a; --primary: #e11d48; --border: #cbd5e1;
+      --bg-base: #f8fafc;
+      --glaze-top: rgba(245, 158, 11, 0.18);
+      --glaze-mid: rgba(217, 119, 6, 0.08);
+      --surface: rgba(255, 255, 255, 0.94);
+      --surface-2: rgba(241, 245, 249, 0.92);
+      --text: #0f172a;
+      --text-muted: #475569;
+      --gold: #d97706;
+      --gold-bright: #f59e0b;
+      --gold-deep: #b45309;
+      --border: rgba(15, 23, 42, 0.14);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
     body {
-      background: var(--bg); color: var(--text); font-family: system-ui, sans-serif;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 1rem;
+      min-height: 100vh;
+      color: var(--text);
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% 6%, var(--glaze-top), transparent 42%),
+        radial-gradient(circle at 88% 15%, var(--glaze-mid), transparent 48%);
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
     }
+
     .box {
-      background: var(--surface); padding: 2rem; border-radius: 12px;
-      text-align: center; max-width: 460px; width: 100%; border: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2rem 1.5rem;
+      border-radius: 14px;
+      text-align: center;
+      max-width: 460px;
+      width: 100%;
+      border: 1px solid var(--border);
+      box-shadow: var(--glass-highlight), 0 20px 45px rgba(0, 0, 0, 0.45);
     }
+
     .ad-box {
-      background: var(--surface-2); border: 1px dashed var(--border);
-      padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.25rem;
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      margin-bottom: 1.25rem;
     }
+
+    h2 {
+      color: var(--gold-bright);
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 0.45rem;
+    }
+
+    #statusText {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .timer {
+      font-size: 2.75rem;
+      font-weight: 900;
+      color: var(--gold-bright);
+      margin: 1.1rem 0;
+    }
+
     .cred-box {
-      display: none; background: var(--surface-2); border: 1px solid var(--border);
-      padding: 0.75rem; border-radius: 8px; font-size: 0.88rem; margin-top: 1rem;
+      display: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      margin-top: 1.15rem;
     }
-    .timer { font-size: 2.75rem; font-weight: 800; color: var(--primary); margin: 1rem 0; }
+
     .btn {
-      display: inline-block; background: var(--primary); color: #fff;
-      padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none;
-      font-weight: bold; margin-top: 0.75rem;
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold), var(--gold-deep));
+      color: #0b0f19;
+      padding: 0.82rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      margin-top: 0.9rem;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
     }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 1.1rem;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--gold-bright); }
   </style>
 </head>
 <body>
   <div class="box">
-    <div class="ad-box" id="downloadAdBox">📢 Hari moviez hub Sponsor Ad (Blocked on Standard & Diamond plans)</div>
+    <div class="ad-box" id="downloadAdBox">📢 Hari moviez hub Sponsor Ad (Blocked on Standard &amp; Diamond plans)</div>
     <h2 id="movieTitle">Fetching Link...</h2>
     <p id="statusText">Please wait while we prepare your download link.</p>
     <div class="timer" id="countdown">5</div>
@@ -47,9 +135,12 @@
     <div class="cred-box" id="credentialsBox">
       <strong>🏷️ Credit / Source:</strong> <span id="credentialsText"></span>
     </div>
+    <a class="back-link" href="/">← Back to Catalog</a>
   </div>
 
   <script>
+    const API_BASE = 'https://misty-chelsy-mahaan-c83f919b.apps.mistral.run';
+
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
@@ -57,37 +148,59 @@
     const id = params.get('id');
     const vipKey = localStorage.getItem('vipKey') || '';
 
+    function showError(heading, message) {
+      document.getElementById('countdown').style.display = 'none';
+      document.getElementById('movieTitle').innerText = heading;
+      document.getElementById('statusText').innerText = message;
+    }
+
     async function initDownload() {
-      const res = await fetch(`/api/download/${id}`, { headers: { 'x-vip-key': vipKey } });
-      if (!res.ok) {
-        document.getElementById('movieTitle').innerText = "Access Denied";
-        document.getElementById('statusText').innerText = "Standard or Diamond plan required for VIP downloads.";
-        document.getElementById('countdown').style.display = 'none';
+      if (!id) {
+        showError('Missing ID', 'No movie or series ID was provided in the URL.');
         return;
       }
 
-      const data = await res.json();
-      document.getElementById('downloadAdBox').style.display = data.showAds ? 'block' : 'none';
-      document.getElementById('movieTitle').innerText = `${data.title} (${data.year})`;
+      try {
+        const res = await fetch(`${API_BASE}/api/download/${encodeURIComponent(id)}`, {
+          headers: { 'x-vip-key': vipKey }
+        });
+        const data = await res.json().catch(() => ({}));
 
-      if (data.credentials) {
-        document.getElementById('credentialsText').innerText = data.credentials;
-        document.getElementById('credentialsBox').style.display = 'block';
-      }
-
-      let seconds = 5;
-      const timerEl = document.getElementById('countdown');
-      const interval = setInterval(() => {
-        seconds--;
-        timerEl.innerText = seconds;
-        if (seconds <= 0) {
-          clearInterval(interval);
-          timerEl.style.display = 'none';
-          document.getElementById('statusText').innerText = "Your download link is ready!";
-          document.getElementById('actionArea').innerHTML =
-            `<a href="${data.downloadLink}" class="btn" rel="noopener noreferrer">🚀 Proceed to Download</a>`;
+        if (!res.ok) {
+          const heading = res.status === 403 ? 'VIP Plan Required' : 'Download Unavailable';
+          const fallbackMsg = res.status === 403
+            ? 'Standard (1 Month) or Diamond (2 Months) plan required for VIP downloads.'
+            : 'Could not find or load this download link.';
+          showError(heading, data.error || fallbackMsg);
+          return;
         }
-      }, 1000);
+
+        document.getElementById('downloadAdBox').style.display = data.showAds ? 'block' : 'none';
+        document.getElementById('movieTitle').innerText = `${data.title} (${data.year})`;
+
+        if (data.credentials) {
+          document.getElementById('credentialsText').innerText = data.credentials;
+          document.getElementById('credentialsBox').style.display = 'block';
+        }
+
+        let seconds = 5;
+        const timerEl = document.getElementById('countdown');
+        timerEl.innerText = seconds;
+
+        const interval = setInterval(() => {
+          seconds -= 1;
+          timerEl.innerText = Math.max(0, seconds);
+          if (seconds <= 0) {
+            clearInterval(interval);
+            timerEl.style.display = 'none';
+            document.getElementById('statusText').innerText = 'Your download link is ready!';
+            document.getElementById('actionArea').innerHTML =
+              `<a href="${data.downloadLink}" class="btn" target="_blank" rel="noopener noreferrer">🚀 Proceed to Download</a>`;
+          }
+        }, 1000);
+      } catch (err) {
+        showError('Connection Error', 'Unable to reach the backend server. Please try again.');
+      }
     }
 
     initDownload();
