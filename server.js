@@ -108,6 +108,10 @@ if (bot) {
   });
 }
 
+function escapeRegex(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function sendToLogChannel(text) {
   if (!bot || !LOG_CHANNEL_ID) return;
   try {
@@ -145,7 +149,7 @@ async function findMediaByIdentifier(identifier) {
     if (byId) return byId;
   }
 
-  const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = escapeRegex(clean);
   return Media.findOne({ title: new RegExp(`^${escaped}$`, 'i') }).sort({ createdAt: -1 })
     || Media.findOne({ title: new RegExp(escaped, 'i') }).sort({ createdAt: -1 });
 }
@@ -289,6 +293,36 @@ if (bot) {
     );
   });
 
+  // ADMIN CLEAN DUPLICATES COMMAND: /cleanmovies
+  bot.onText(/^\/cleanmovies$/i, async (msg) => {
+    if (!(await isAuthorized(msg.from?.id))) {
+      return bot.sendMessage(msg.chat.id, '❌ Admin only command.');
+    }
+
+    const allItems = await Media.find().sort({ createdAt: -1 });
+    const seen = new Set();
+    const duplicateIds = [];
+
+    for (const item of allItems) {
+      const key = `${item.title.trim().toLowerCase()}__${item.year.trim().toLowerCase()}`;
+      if (seen.has(key)) {
+        duplicateIds.push(item._id);
+      } else {
+        seen.add(key);
+      }
+    }
+
+    if (!duplicateIds.length) {
+      return bot.sendMessage(msg.chat.id, '✅ No duplicate titles found.');
+    }
+
+    await Media.deleteMany({ _id: { $in: duplicateIds } });
+    return bot.sendMessage(
+      msg.chat.id,
+      `🧹 Removed ${duplicateIds.length} duplicate entry/entries from ${SITE_NAME}.`
+    );
+  });
+
   // ADMIN DELETE COMMAND: /deletemovie <title or id>
   bot.onText(/^\/deletemovie(?:\s+([\s\S]+))?$/i, async (msg, match) => {
     if (!(await isAuthorized(msg.from?.id))) {
@@ -405,6 +439,17 @@ if (bot) {
       );
     }
 
+    const existingItem = await Media.findOne({
+      title: new RegExp(`^${escapeRegex(data.title)}$`, 'i')
+    });
+
+    if (existingItem) {
+      return bot.sendMessage(
+        msg.chat.id,
+        `⚠️ "${existingItem.title}" (${existingItem.year}) already exists in ${SITE_NAME} [${existingItem.category.toUpperCase()}].`
+      );
+    }
+
     let createdItem;
     try {
       createdItem = await Media.create({ ...data, category });
@@ -430,7 +475,7 @@ if (bot) {
   bot.onText(/^\/?bycredit\s+(.+)/i, async (msg, match) => {
     if (!(await isAuthorized(msg.from?.id))) return;
     const creditQuery = match[1].trim();
-    const items = await Media.find({ credentials: new RegExp(creditQuery, 'i') })
+    const items = await Media.find({ credentials: new RegExp(escapeRegex(creditQuery), 'i') })
       .sort({ createdAt: -1 })
       .limit(15);
     if (!items.length) return bot.sendMessage(msg.chat.id, `No items found for credit: ${creditQuery}`);
