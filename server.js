@@ -643,6 +643,10 @@ async function generateShortlink(targetUrl) {
 }
 
 // --- EXPRESS API ROUTES ---
+app.get('/health', (req, res) => {
+  res.json({ ok: true, siteName: SITE_NAME });
+});
+
 app.get('/api/config', (req, res) => {
   res.json({
     siteName: SITE_NAME,
@@ -740,6 +744,26 @@ app.get('/api/download/:id', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`${SITE_NAME} running on http://localhost:${PORT}`);
 });
+
+async function shutdown(signal) {
+  console.log(`[${SITE_NAME}] Received ${signal}, shutting down cleanly...`);
+  try {
+    if (bot && bot.isPolling()) {
+      await bot.stopPolling();
+    }
+  } catch (err) {
+    console.error(`[${SITE_NAME}] Error stopping bot polling:`, err.message);
+  }
+  server.close(async () => {
+    try {
+      await mongoose.connection.close();
+    } catch {}
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
