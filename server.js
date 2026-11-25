@@ -76,6 +76,8 @@ const VipKeySchema = new mongoose.Schema({
   plan: { type: String, enum: ['basic', 'standard', 'diamond'], required: true },
   userId: { type: Number, required: true },
   isActive: { type: Boolean, default: true },
+  used: { type: Boolean, default: false },
+  deviceId: { type: String, default: '' },
   expiresAt: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now }
 });
@@ -638,7 +640,7 @@ if (bot) {
 }
 
 // --- ENTITLEMENT & SHORTLINK HELPERS ---
-async function getUserEntitlement(key) {
+async function getUserEntitlement(key, deviceId = '') {
   if (!key) {
     return {
       active: false,
@@ -665,6 +667,19 @@ async function getUserEntitlement(key) {
     };
   }
 
+  if (keyDoc.used && keyDoc.deviceId && deviceId && keyDoc.deviceId !== String(deviceId).trim()) {
+    return {
+      active: false,
+      plan: 'none',
+      planName: 'Free',
+      vipAccess: false,
+      hideAds: false,
+      skipShortlink: false,
+      expiresAt: null,
+      alreadyUsed: true
+    };
+  }
+
   const planCfg = PLANS[keyDoc.plan] || PLANS.basic;
   return {
     active: true,
@@ -680,10 +695,18 @@ async function getUserEntitlement(key) {
 async function generateShortlink(targetUrl) {
   if (process.env.SHORTLINK_API_URL && process.env.SHORTLINK_API_KEY) {
     try {
-      const endpoint = `${process.env.SHORTLINK_API_URL}?api=${encodeURIComponent(process.env.SHORTLINK_API_KEY)}&url=${encodeURIComponent(targetUrl)}`;
+      const baseUrl = process.env.SHORTLINK_API_URL.replace(/[/?]+$/, '');
+      const endpoint = `${baseUrl}?api=${encodeURIComponent(process.env.SHORTLINK_API_KEY)}&url=${encodeURIComponent(targetUrl)}`;
       const response = await fetch(endpoint);
       const data = await response.json();
-      const shortUrl = data.shortenedUrl || data.short_url || data.url;
+      const shortUrl =
+        data.shortenedUrl ||
+        data.short_url ||
+        data.shortlink ||
+        data.url ||
+        data.data?.shortenedUrl ||
+        data.data?.short_url ||
+        data.data?.url;
       if (shortUrl && typeof shortUrl === 'string') return shortUrl;
     } catch (err) {
       console.error(`[${SITE_NAME}] Shortlink API error, using fallback:`, err.message);
@@ -728,7 +751,10 @@ app.post('/api/request-content', async (req, res) => {
 });
 
 app.get('/api/media', async (req, res) => {
-  const entitlement = await getUserEntitlement(req.headers['x-vip-key']);
+  const entitlement = await getUserEntitlement(
+    req.headers['x-vip-key'],
+    req.headers['x-device-id']
+  );
   const allMedia = await Media.find().sort({ createdAt: -1 });
 
   const sanitized = allMedia.map(item => {
@@ -751,23 +777,49 @@ app.get('/api/media', async (req, res) => {
 });
 
 app.post('/api/verify-vip', async (req, res) => {
-  const { key } = req.body || {};
-  const entitlement = await getUserEntitlement(key);
-  if (entitlement.active) {
-    return res.json({
-      valid: true,
-      entitlement,
-      message: `${entitlement.planName} plan active until ${new Date(entitlement.expiresAt).toDateString()}!`
+  const { key, deviceId } = req.body || {};
+  const cleanKey = String(key || '').trim();
+  const cleanDeviceId = String(deviceId || req.headers['x-device-id'] || '').trim();
+
+  if (!cleanKey) {
+    return res.status(400).json({ valid: false, message: 'Please enter an access key.' });
+  }
+
+  const keyDoc = await VipKey.findOne({ key: cleanKey, isActive: true });
+  if (!keyDoc) {
+    return res.status(401).json({ valid: false, message: 'Invalid access key.' });
+  }
+
+  if (new Date(keyDoc.expiresAt) <= new Date()) {
+    return res.status(401).json({ valid: false, message: 'This key has expired.' });
+  }
+
+  if (keyDoc.used && keyDoc.deviceId && keyDoc.deviceId !== cleanDeviceId) {
+    return res.status(403).json({
+      valid: false,
+      message: 'Already used. Use your own key to activate plans.'
     });
   }
-  res.status(401).json({
-    valid: false,
-    message: entitlement.expired ? 'This key has expired.' : 'Invalid access key.'
+
+  if (!keyDoc.used) {
+    keyDoc.used = true;
+    keyDoc.deviceId = cleanDeviceId || crypto.randomBytes(8).toString('hex');
+    await keyDoc.save();
+  }
+
+  const entitlement = await getUserEntitlement(cleanKey, keyDoc.deviceId);
+  return res.json({
+    valid: true,
+    entitlement,
+    message: `${entitlement.planName} plan active until ${new Date(entitlement.expiresAt).toDateString()}!`
   });
 });
 
 app.get('/api/download/:id', async (req, res) => {
-  const entitlement = await getUserEntitlement(req.headers['x-vip-key']);
+  const entitlement = await getUserEntitlement(
+    req.headers['x-vip-key'],
+    req.headers['x-device-id']
+  );
   const item = await Media.findById(req.params.id).catch(() => null);
   if (!item) return res.status(404).json({ error: 'Not found' });
 
