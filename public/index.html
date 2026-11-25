@@ -547,7 +547,7 @@
   </div>
 
   <section class="section-block" id="trendingSection">
-    <div class="section-heading">🔥 Top 5 Trending Today</div>
+    <div class="section-heading">🔥 Top 5 Trending Movies</div>
     <div class="trending-row" id="trendingGrid"></div>
   </section>
 
@@ -854,10 +854,19 @@
     trendingGrid.innerHTML = '';
     grid.innerHTML = '';
 
-    const showTrending = currentTab === 'all' && !query && allMedia.length > 0;
+    const topMovies = allMedia
+      .filter(item => item.category === 'movie')
+      .slice(0, 5);
+
+    const showTrending = currentTab === 'all' && !query && topMovies.length > 0;
     trendingSection.style.display = showTrending ? 'block' : 'none';
+
+    const topMovieIds = new Set();
     if (showTrending) {
-      allMedia.slice(0, 5).forEach(item => trendingGrid.appendChild(createPosterCard(item)));
+      topMovies.forEach(item => {
+        topMovieIds.add(String(item._id));
+        trendingGrid.appendChild(createPosterCard(item));
+      });
     }
 
     const labelMap = {
@@ -872,7 +881,8 @@
       const matchesTab = currentTab === 'all' || item.category === currentTab;
       const matchesTitle = item.title.toLowerCase().includes(query);
       const matchesCredit = (item.credentials || '').toLowerCase().includes(query);
-      return matchesTab && (matchesTitle || matchesCredit);
+      const notAlreadyInTopMovies = !showTrending || !topMovieIds.has(String(item._id));
+      return matchesTab && (matchesTitle || matchesCredit) && notAlreadyInTopMovies;
     });
 
     countPill.innerText = `${filtered.length} Items`;
