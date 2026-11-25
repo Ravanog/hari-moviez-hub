@@ -405,17 +405,22 @@ if (bot) {
       );
     }
 
+    let createdItem;
     try {
-      await Media.create({ ...data, category });
-      const creditLine = data.credentials ? `\n🏷️ *Credit:* ${data.credentials}` : '';
+      createdItem = await Media.create({ ...data, category });
+    } catch (err) {
+      console.error(`[${SITE_NAME}] Failed saving media to MongoDB:`, err.message);
+      return bot.sendMessage(msg.chat.id, '❌ Failed to save item to database.');
+    }
+
+    try {
+      const creditLine = createdItem.credentials ? `\n🏷️ Credit: ${createdItem.credentials}` : '';
       await bot.sendMessage(
         msg.chat.id,
-        `✅ Added *${data.title} (${data.year})* to *${SITE_NAME}* [${category.toUpperCase()}]!${creditLine}`,
-        { parse_mode: 'Markdown' }
+        `✅ Added ${createdItem.title} (${createdItem.year}) to ${SITE_NAME} [${category.toUpperCase()}]!${creditLine}`
       );
     } catch (err) {
-      console.error(`[${SITE_NAME}] Failed saving media:`, err.message);
-      await bot.sendMessage(msg.chat.id, '❌ Failed to save item to database.');
+      console.error(`[${SITE_NAME}] Media saved, but Telegram confirmation failed:`, err.message);
     }
   }
 
