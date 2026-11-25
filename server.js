@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const SITE_NAME = 'Hari moviez hub';
-const PORT = Number(process.env.PORT || 3000);
+const PORT = Number(process.env.PORT || 8080);
 const OWNER_ID = Number(process.env.OWNER_ID || 0);
 const ALLOWED_CHANNEL_ID = process.env.CHANNEL_ID ? Number(process.env.CHANNEL_ID) : null;
 const LOG_CHANNEL_ID = process.env.LOG_CHANNEL_ID ? Number(process.env.LOG_CHANNEL_ID) : null;
